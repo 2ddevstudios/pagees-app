@@ -33,6 +33,7 @@ export default function RootLayout() {
     'AirbnbCereal_W_Light': require('../assets/fonts/AirbnbCereal_W_Lt.otf'),
     'AirbnbCereal_W_Medium': require('../assets/fonts/AirbnbCereal_W_Md.otf'),
     'AirbnbCereal_W_XtraBold': require('../assets/fonts/AirbnbCereal_W_XBd.otf'),
+    'AirbnbCereal_W_Blk': require('../assets/fonts/AirbnbCereal_W_Blk.otf'),
   });
 
   if (!loaded) {
@@ -52,7 +53,7 @@ export default function RootLayout() {
               }}
               duration={5000}
               animationType="slide-in"
-              textStyle={{ fontFamily: "Inter_Regular", fontSize: 14, color: 'white' }}
+              textStyle={{ fontFamily: "AirbnbCereal_W_Medium", fontSize: 14, color: 'white' }}
               swipeEnabled
               successColor={'#0f7149'}
               dangerColor="red"
@@ -61,10 +62,10 @@ export default function RootLayout() {
               <MenuProvider>
                 <Stack initialRouteName='index'>
                   <Stack.Screen name="index" options={{ headerShown: false }} />
-                  <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                  <Stack.Screen name="auth" options={{ headerShown: false }} />
                   <Stack.Screen name="+not-found" />
                 </Stack>
-                <StatusBar style="auto" />
+                <StatusBar style="dark" backgroundColor='white' translucent animated />
               </MenuProvider>
             </ToastProvider>
           </QueryClientProvider>

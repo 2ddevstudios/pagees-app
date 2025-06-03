@@ -1,19 +1,18 @@
-import {
-  TextInputProps,
-  TextInput,
-  StyleSheet,
-  Alert,
-  ViewStyle,
-  TextStyle,
-} from "react-native";
-import { Controller, useFormContext } from "react-hook-form";
-import React from "react";
-import { useTheme } from "@shopify/restyle";
-import { Theme } from "@/theme";
+/* eslint-disable import/no-unresolved */
 import Box from "@/components/Box";
 import CustomText from "@/components/CustomText";
-import { Ionicons, Feather } from "@expo/vector-icons";
-import { StyleProps } from "react-native-reanimated";
+import { Theme } from "@/theme";
+import { Feather } from "@expo/vector-icons";
+import { useTheme } from "@shopify/restyle";
+import React from "react";
+import { Controller, useFormContext } from "react-hook-form";
+import {
+  StyleSheet,
+  TextInput,
+  TextInputProps,
+  TextStyle,
+  ViewStyle,
+} from "react-native";
 
 interface IProps {
   required?: boolean;
@@ -26,6 +25,7 @@ interface IProps {
   removeSpecialCharater?: boolean;
   removeSpaces?: boolean;
   textInputStyle?: TextStyle;
+  showClearButton?: boolean;
 }
 
 export const CustomTextInput = (props: IProps & TextInputProps) => {
@@ -36,26 +36,26 @@ export const CustomTextInput = (props: IProps & TextInputProps) => {
   // form context
   const {
     control,
+    setValue,
     formState: { errors },
   } = useFormContext();
   return (
     <Box style={{ ...props.containerStyle }}>
-      {props.showLabel ||
-        (props.showLabel === undefined && (
-          <Box flexDirection="row">
-            <CustomText
-              variant="body"
-              fontSize={14}
-              color="black"
-              marginBottom="s"
-            >
-              {props.label || props.placeholder}
-            </CustomText>
-            {props.required && (
-              <CustomText style={{ color: "red" }}>*</CustomText>
-            )}
-          </Box>
-        ))}
+      {props.showLabel && (
+        <Box flexDirection="row">
+          <CustomText
+            variant="medium"
+            fontSize={14}
+            color="black"
+            marginBottom="s"
+          >
+            {props.label}
+          </CustomText>
+          {props.required && (
+            <CustomText style={{ color: "red" }}>*</CustomText>
+          )}
+        </Box>
+      )}
       <Controller
         control={control}
         rules={{
@@ -64,14 +64,14 @@ export const CustomTextInput = (props: IProps & TextInputProps) => {
         name={props.name}
         render={({ field: { onChange, value } }) => {
           const handleInputChange = (text: string) => {
-            // Remove special characters using a regular expression
-            const filteredText = text.replace(/[^\w\s]/gi, "");
+            // // Remove special characters using a regular expression
+            // const filteredText = text.replace(/[^\w\s]/gi, "");
 
-            //remove all spaces
-            const newText = props.removeSpaces
-              ? filteredText.replace(/\s/g, "_")
-              : filteredText;
-            onChange(newText);
+            // //remove all spaces
+            // const newText = props.removeSpaces
+            //   ? filteredText.replace(/\s/g, "_")
+            //   : filteredText;
+            onChange(text);
           };
           return (
             <Box
@@ -82,8 +82,8 @@ export const CustomTextInput = (props: IProps & TextInputProps) => {
                     focused && !errors[props.name]
                       ? theme.colors.primaryColor
                       : errors[props.name]
-                      ? theme.colors.error
-                      : theme.colors.borderColor,
+                        ? theme.colors.error
+                        : theme.colors.borderColor,
                 },
               ]}
             >
@@ -91,16 +91,16 @@ export const CustomTextInput = (props: IProps & TextInputProps) => {
                 style={{
                   flex: 1,
                   justifyContent: "center",
-                  paddingVertical: 10,
-                  paddingHorizontal: 5,
+
+                  paddingRight: 5,
                 }}
               >
                 {/* {focused && <Text variant='xs'>{props.placeholder || props.name}</Text>} */}
                 <TextInput
-                  {...props}
                   placeholderTextColor={theme.colors.bodyTextColor}
-                  cursorColor={theme.colors.bodyTextColor}
-                  placeholder={!focused ? props.placeholder || props.label : ""}
+
+                  cursorColor={theme.colors.primaryColor}
+                  placeholder={props.placeholder}
                   value={value}
                   onChangeText={(e) => {
                     props.removeSpecialCharater
@@ -111,9 +111,13 @@ export const CustomTextInput = (props: IProps & TextInputProps) => {
                   onBlur={() => setFocused(false)}
                   secureTextEntry={props.isPassword ? showPassword : false}
                   style={{
+                    flex: 1,
+                    width: '100%',
+                    height: '100%',
                     color: theme.colors.bodyTextColor,
-                    fontFamily: "Inter_Regular",
-                    ...props.textInputStyle,
+                    fontFamily: "AirbnbCereal_W_Light",
+                    fontSize: 16
+                    // ...props.textInputStyle,
                   }}
                 />
               </Box>
@@ -121,6 +125,14 @@ export const CustomTextInput = (props: IProps & TextInputProps) => {
                 <Feather
                   onPress={() => setShowPassword((prev) => !prev)}
                   name={showPassword ? "eye" : "eye-off"}
+                  size={23}
+                  color={theme.colors.bodyTextColor}
+                />
+              )}
+              {!props.isPassword && props.showClearButton && (
+                <Feather
+                  onPress={() => setValue(props.name, "")}
+                  name={'x-circle'}
                   size={23}
                   color={theme.colors.bodyTextColor}
                 />
@@ -133,7 +145,7 @@ export const CustomTextInput = (props: IProps & TextInputProps) => {
         <CustomText
           variant="xs"
           fontSize={14}
-          fontFamily={"GeoramaRegular"}
+          fontFamily={"AirbnbCereal_W_Light"}
           style={{ color: "red" }}
         >
           {errors[props.name]?.message as any}
@@ -147,12 +159,12 @@ const Style = StyleSheet.create({
   parent: {
     width: "100%",
     height: 42,
-    borderRadius: 8,
-    borderWidth: 1,
+    borderRadius: 0,
+    borderBottomWidth: 2,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 10,
+    paddingHorizontal: 0,
     fontFamily: "Inter_Regular",
   },
   textInput: {

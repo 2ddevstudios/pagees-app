@@ -1,3 +1,4 @@
+/* eslint-disable import/no-unresolved */
 import Box from '@/components/Box';
 import ButtonWrapper from '@/components/ButtonWrapper';
 import CustomText from '@/components/CustomText';
@@ -5,10 +6,13 @@ import { Theme } from '@/theme';
 import { useTheme } from '@shopify/restyle';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
+import { router } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
 import { LoginCurve } from 'iconsax-react-nativejs';
 import React from 'react';
 import { useWindowDimensions } from 'react-native';
 import PagerView from 'react-native-pager-view';
+
 
 const items: { text: string, image: any, label: string }[] = [
     {
@@ -39,13 +43,14 @@ const LandingPage = () => {
             colors={['#6B73FF', '#000DFF']}
             style={{ flex: 1 }}
         >
+            <StatusBar style="light" backgroundColor='white' translucent animated />
             <Box flex={0.7} justifyContent='center' alignItems='center' paddingHorizontal='m'>
                 <PagerView style={{ flex: 1, width: '100%', height: '100%' }} onPageScroll={(e) => setIndex(e.nativeEvent.position)}>
                     {items.map((item, index) => (
                         <Box key={index.toString()} flex={1} width={'100%'} height={"100%"}>
                             <Image source={item.image} contentFit='contain' style={{ width: '100%', height: (HEIGHT / 100) * 58 }} />
                             <CustomText variant='header2' color='white' style={{ width: '70%' }}>{item?.label}</CustomText>
-                            <CustomText variant='medium' fontSize={14} style={{ color: 'whitesmoke', marginTop: 5 }}>{item?.text}</CustomText>
+                            <CustomText variant='subheader' fontSize={14} style={{ color: 'whitesmoke', marginTop: 5 }}>{item?.text}</CustomText>
                         </Box>
                     ))}
                 </PagerView>
@@ -56,32 +61,32 @@ const LandingPage = () => {
                 </Box>
             </Box>
             <Box width={'100%'} flex={0.3} justifyContent='center' paddingHorizontal='m'>
-                <ButtonWrapper width={'100%'} height={45} onPress={() => { }} borderRadius={30} backgroundColor={theme.colors.white}>
+                <ButtonWrapper width={'100%'} height={50} onPress={() => { router.push('/auth/login') }} borderRadius={30} backgroundColor={theme.colors.white}>
                     <Box flex={1} flexDirection='row' justifyContent='center' alignItems='center'>
                         <LoginCurve variant='Bulk' size={25} color={theme.colors.bodyTextColor} />
-                        <CustomText variant='medium' fontSize={16}>Continue with Email</CustomText>
+                        <CustomText variant='subheader' fontSize={14}>Continue with Email</CustomText>
                     </Box>
                 </ButtonWrapper>
 
                 <Box width={'100%'} marginTop='s' flexDirection='row' justifyContent='space-between'>
-                    <ButtonWrapper width={'30%'} height={45} onPress={() => { }} borderRadius={30} backgroundColor={theme.colors.white}>
+                    <ButtonWrapper width={'32%'} height={45} onPress={() => { router.push('/auth/setup') }} borderRadius={30} backgroundColor={theme.colors.white}>
                         <Box flex={1} flexDirection='row' justifyContent='center' alignItems='center'>
                             <Image source={(require('../assets/images/appleicon.png'))} contentFit='contain' style={{ width: 20, height: 20 }} />
-                            <CustomText variant='medium' fontSize={14} style={{ marginLeft: 2 }}>Apple</CustomText>
+                            <CustomText variant='subheader' fontSize={14} style={{ marginLeft: 2 }}>Apple</CustomText>
                         </Box>
                     </ButtonWrapper>
 
-                    <ButtonWrapper width={'30%'} height={45} onPress={() => { }} borderRadius={30} backgroundColor={theme.colors.white}>
+                    <ButtonWrapper width={'32%'} height={45} onPress={() => { }} borderRadius={30} backgroundColor={theme.colors.white}>
                         <Box flex={1} flexDirection='row' justifyContent='center' alignItems='center'>
                             <Image source={(require('../assets/images/googleicon.png'))} contentFit='contain' style={{ width: 20, height: 20 }} />
-                            <CustomText variant='medium' fontSize={14} style={{ marginLeft: 2 }}>Google</CustomText>
+                            <CustomText variant='subheader' fontSize={14} style={{ marginLeft: 2 }}>Google</CustomText>
                         </Box>
                     </ButtonWrapper>
 
-                    <ButtonWrapper width={'30%'} height={45} onPress={() => { }} borderRadius={30} backgroundColor={theme.colors.white}>
+                    <ButtonWrapper width={'32%'} height={45} onPress={() => { }} borderRadius={30} backgroundColor={theme.colors.white}>
                         <Box flex={1} flexDirection='row' justifyContent='center' alignItems='center'>
                             <Image source={(require('../assets/images/facebookicon.png'))} contentFit='contain' style={{ width: 20, height: 20 }} />
-                            <CustomText variant='medium' fontSize={14} style={{ marginLeft: 2 }}>Facebook</CustomText>
+                            <CustomText variant='subheader' fontSize={14} style={{ marginLeft: 2 }}>Facebook</CustomText>
                         </Box>
                     </ButtonWrapper>
                 </Box>

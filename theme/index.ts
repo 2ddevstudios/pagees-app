@@ -11,7 +11,7 @@ const COLOR_PALLET = {
   darkPrimaryrimaryBlue: PRIMARY_DARK,
   fadedPrimary: "#F5F8FF",
   mainBackgroundColor: "white",
-  secondaryBackgroundColor: "lightgrey",
+  secondaryBackgroundColor: "whitesmoke",
   headerTextColor: "#101828",
   disabledTextColor: "#92969D",
   bodyTextColor: "#667085",
@@ -22,7 +22,8 @@ const COLOR_PALLET = {
   black: "black",
   white: "white",
   borderColor: "#D0D5DD",
-  buttonBg: '#0085FF'
+  buttonBg: '#0085FF',
+  primaryGreen:'#3BA935',
 };
 
 const theme = createTheme({
@@ -43,7 +44,7 @@ const theme = createTheme({
     header2: {
       fontSize: getDynamicFontSize("xl"),
       color: "headerTextColor",
-      fontFamily: "AirbnbCereal_W_XtraBold",
+      fontFamily: "AirbnbCereal_W_Blk",
     },
     header2_italic: {
       fontSize: getDynamicFontSize("xl"),
