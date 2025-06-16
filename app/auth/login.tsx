@@ -1,3 +1,4 @@
+
 import Box from '@/components/Box'
 import CustomText from '@/components/CustomText'
 import AuthHeader from '@/components/auth/AuthHeader'
@@ -30,9 +31,9 @@ const LoginPage = () => {
             console.log(data);
 
             if (error) {
-                toast.show(error?.message, { type: 'danger', placement: 'bottom' });
+                toast.show(error?.message, { type: 'danger', placement: 'top' });
             }
-            toast.show('Login successful', { type: 'success', placement: 'bottom' });
+            toast.show('Login successful', { type: 'success', placement: 'top' });
             setIsLoading(false);
         } catch (error: any) {
             toast.show(error?.message, { type: 'danger' });

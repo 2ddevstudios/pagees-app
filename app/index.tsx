@@ -1,4 +1,4 @@
-/* eslint-disable import/no-unresolved */
+
 import Box from '@/components/Box';
 import ButtonWrapper from '@/components/ButtonWrapper';
 import CustomText from '@/components/CustomText';
@@ -60,7 +60,7 @@ const LandingPage = () => {
                     ))}
                 </Box>
             </Box>
-            <Box width={'100%'} flex={0.3} justifyContent='center' paddingHorizontal='m'>
+            <Box width={'100%'} flex={0.3} justifyContent='flex-end' paddingHorizontal='m' paddingBottom='l'>
                 <ButtonWrapper width={'100%'} height={50} onPress={() => { router.push('/auth/login') }} borderRadius={30} backgroundColor={theme.colors.white}>
                     <Box flex={1} flexDirection='row' justifyContent='center' alignItems='center'>
                         <LoginCurve variant='Bulk' size={25} color={theme.colors.bodyTextColor} />

@@ -1,4 +1,4 @@
-/* eslint-disable import/no-unresolved */
+
 import Box from '@/components/Box'
 import CustomText from '@/components/CustomText'
 import AuthHeader from '@/components/auth/AuthHeader'
@@ -35,44 +35,51 @@ const SignupPage = () => {
             // check the database for the email first
             const { data: UserExist, error: UserExistError } = await supabase
                 .from('Users')
-                .select('email')
+                .select('*')
                 .eq('email', email)
-                .single();
+                .single()
 
             if (UserExist) {
                 console.log(UserExist);
-                toast.show('A user with this email already exisits', { type: 'danger', placement: 'bottom' });
+                toast.show('A user with this email already exisits', { type: 'danger', placement: 'top' });
                 setIsLoading(false);
                 return;
             }
 
-            // signup the user
-            const { data, error } = await supabase.auth.signUp({
-                email,
-                password,
-                options: {
-                    emailRedirectTo: `${window.location.origin}/auth/callback`,
-                }
-            });
-
-            if (!error) {
-                console.log(data);
-                // create the User details
-                const details = await supabase.from('Users').insert({
+            if (!UserExist) {
+                console.log('NO USER FOUND');
+                console.log(UserExistError);
+                setIsLoading(false);
+                // // signup the user
+                const { data, error } = await supabase.auth.signUp({
                     email,
-                    id: data?.user?.id,
+                    password,
+                    options: {
+                        emailRedirectTo: `${window.location.origin}/auth/callback`,
+                    }
                 });
-                console.log(details);
-                setId(data?.user?.id as string);
-                toast.show('Please check your email for a confirmation link', { type: 'success', placement: 'bottom' });
-                setIsLoading(false);
-                router.push('/auth/setup');
+
+                if (!error) {
+                    console.log(data);
+                    // create the User details
+                    const details = await supabase.from('Users').insert({
+                        email,
+                        id: data?.user?.id,
+                    });
+                    console.log(details);
+                    setId(data?.user?.id as string);
+                    toast.show('Please check your email for a confirmation link', { type: 'success', placement: 'top' });
+                    setIsLoading(false);
+                    router.push('/auth/setup');
+                }
+
+                if (error) {
+                    toast.show(error?.message, { type: 'danger', placement: 'bottom' });
+                    setIsLoading(false);
+                }
             }
 
-            if (error) {
-                toast.show(error?.message, { type: 'danger', placement: 'bottom' });
-                setIsLoading(false);
-            }
+
 
         } catch (error: any) {
             toast.show(error?.message, { type: 'danger' });

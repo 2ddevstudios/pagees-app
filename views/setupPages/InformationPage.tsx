@@ -88,8 +88,6 @@ const InformationPage = () => {
                 // throw uploadError;
             }
 
-
-
             // Get the public URL for the uploaded image
             const { data: { publicUrl } } = supabase.storage
                 .from('pagisbucket')
