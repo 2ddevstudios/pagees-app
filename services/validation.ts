@@ -27,9 +27,12 @@ const resetPasswordSchema = z.object({
     email: z.string().email('Invalid Email').min(3, 'Invalid mail'),
 });
 
+const emailVerificationSchema = z.object({
+    code: z.string().min(6, 'Invalid mail'),
+});
+
 
 export {
-    editUserInfoValidation,
-    loginSchema, resetPasswordSchema, signupSchema
+    editUserInfoValidation, emailVerificationSchema, loginSchema, resetPasswordSchema, signupSchema
 };
 

@@ -5,7 +5,7 @@ import axios, {
 } from "axios";
 import * as SecureStorage from "expo-secure-store";
 
-export const BASE_URL = "https://restapi-production-bf10.up.railway.app";
+export const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
 
 const httpService = axios.create({
   baseURL: BASE_URL,
@@ -38,6 +38,7 @@ httpService.interceptors.response.use(
     return response;
   },
   async (error: AxiosError<any, any>) => {
+    console.log(error);
     if (!error.response) {
       return Promise.reject(error.message);
     } else {

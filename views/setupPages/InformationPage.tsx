@@ -5,31 +5,33 @@ import Box from '@/components/Box'
 import CustomText from '@/components/CustomText'
 import { CustomTextInput } from '@/components/form/CustomInput'
 import { SubmitButton } from '@/components/form/SubmitButton'
+import Urls from '@/hooks/http/urls'
 import useForm from '@/hooks/useForm'
 import useToast from '@/hooks/useToast'
-import { supabase } from '@/lib/supabase'
 import { editUserInfoValidation } from '@/services/validation'
+import httpService from '@/utils/httpService'
+import { useMutation } from '@tanstack/react-query'
 import { Image } from 'expo-image'
 import * as ImagePicker from 'expo-image-picker'
 import { DocumentUpload } from 'iconsax-react-nativejs'
 import { useAtomValue, useSetAtom } from 'jotai'
 import React from 'react'
-import { KeyboardAvoidingView, useWindowDimensions } from 'react-native'
+import { KeyboardAvoidingView } from 'react-native'
 import { ScrollView, TouchableOpacity } from 'react-native-gesture-handler'
 import { z } from 'zod'
 
 const InformationPage = () => {
     const [file, setFile] = React.useState<ImagePicker.ImagePickerAsset | null>(null);
+    const [image, setImage] = React.useState<string | null>(null)
     const [loading, setLoading] = React.useState(false);
     // atoms
     const id = useAtomValue(signupIdAtom);
     const setStage = useSetAtom(setupStageAtom);
 
     const toast = useToast();
-    const { height: HEIGHT } = useWindowDimensions();
 
 
-    const { renderForm } = useForm({
+    const { renderForm, values } = useForm({
         defaultValues: {
             firstName: '',
             lastName: '',
@@ -39,7 +41,33 @@ const InformationPage = () => {
             instagramUsername: '',
         },
         validationSchema: editUserInfoValidation
-    })
+    });
+
+    const { mutate: uploadImage, isPending: imageIsPending } = useMutation({
+        mutationFn: (data: any) => httpService.post(`${Urls.upload}/file`, data),
+        onError: (error) => {
+            console.log(error)
+            toast.show(error?.message, { type: 'danger', placement: 'bottom' });
+        },
+        onSuccess: (data) => {
+            console.log(data?.data);
+            console.log(values);
+            mutate({ ...values(), profilePicture: data?.data?.data?.fileName })
+        }
+    });
+
+    const { mutate, isPending } = useMutation({
+        mutationFn: (data: any) => httpService.put(`${Urls.auth}/update/user/${id}`, data),
+        onError: (error) => {
+            toast.show(error?.message, { type: 'danger', placement: 'bottom' });
+        },
+        onSuccess: (data) => {
+            toast.show('Profile updated successfully', { type: 'success', placement: 'bottom' });
+            setStage(2)// Navigate to the next setup step
+        }
+    });
+
+
 
     // functions
 
@@ -75,44 +103,10 @@ const InformationPage = () => {
                 type: `image/${fileExt}`,
             } as any);
 
-            const user = await supabase.auth.getUser();
-            console.log('USER');
-            console.log(id);
+            // uploadImage
+            uploadImage(formData);
 
-            const { data: uploadData, error: uploadError } = await supabase.storage
-                .from('pagisbucket')
-                .upload(fileName, formData);
 
-            if (uploadError) {
-                console.log(uploadError);
-                // throw uploadError;
-            }
-
-            // Get the public URL for the uploaded image
-            const { data: { publicUrl } } = supabase.storage
-                .from('pagisbucket')
-                .getPublicUrl(fileName);
-
-            // Update the user record in the database
-            const { error: updateError } = await supabase
-                .from('Users')
-                .update({
-                    firstName: data.firstName,
-                    lastName: data.lastName,
-                    phone: data.phone,
-                    twitterUsername: data.twitterUsername,
-                    facebookUsername: data.facebookUsername,
-                    instagramUsername: data.instagramUsername,
-                    profilePic: publicUrl,
-                })
-                .eq('id', id);
-
-            if (updateError) {
-                throw updateError;
-            }
-
-            toast.show('Profile updated successfully', { type: 'success', placement: 'bottom' });
-            setStage(2)// Navigate to the next setup step
         } catch (error: any) {
             toast.show(error?.message || 'An error occurred', { type: 'danger', placement: 'bottom' });
         } finally {
@@ -164,7 +158,7 @@ const InformationPage = () => {
                     </Box>
                 </Box>
                 <Box height={40} />
-                <SubmitButton width={'100%'} label='Continue' onSubmit={(data) => handleSubmit(data)} isLoading={loading} />
+                <SubmitButton width={'100%'} label='Continue' onSubmit={(data) => handleSubmit(data)} isLoading={isPending || imageIsPending} />
             </ScrollView>
 
         </KeyboardAvoidingView>

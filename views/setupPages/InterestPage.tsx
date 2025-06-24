@@ -4,10 +4,14 @@ import { signupIdAtom } from '@/app/auth/signup'
 import Box from '@/components/Box'
 import CustomButton from '@/components/CustomButton'
 import CustomText from '@/components/CustomText'
+import Urls from '@/hooks/http/urls'
 import useToast from '@/hooks/useToast'
-import { supabase } from '@/lib/supabase'
+import { ApiResponseType } from '@/models/ApiResponseType'
 import { Theme } from '@/theme'
+import httpService from '@/utils/httpService'
 import { useTheme } from '@shopify/restyle'
+import { useMutation, useQuery } from '@tanstack/react-query'
+import { AxiosResponse } from 'axios'
 import { router } from 'expo-router'
 import { useAtomValue, useSetAtom } from 'jotai'
 import React from 'react'
@@ -26,6 +30,8 @@ const items = [
 const InterestPage = () => {
     const [active, setActive] = React.useState<string[]>([]);
     const [loading, setLoading] = React.useState(false);
+    const [industries, setIndustries] = React.useState<string[]>([]);
+
     // atoms
     const id = useAtomValue(signupIdAtom);
     const setStage = useSetAtom(setupStageAtom);
@@ -33,6 +39,32 @@ const InterestPage = () => {
 
     const theme = useTheme<Theme>();
     const { width: WIDTH } = useWindowDimensions();
+
+    //query
+    const getIndustries = useQuery<AxiosResponse<ApiResponseType<string[]>>, any>({
+        queryKey: ['get-industries'],
+        queryFn: () => httpService.get(`${Urls.common}/interests`),
+    });
+
+    React.useEffect(() => {
+        if (!getIndustries.isLoading && !getIndustries.isError && getIndustries.data) {
+            setIndustries(getIndustries.data.data.data as string[]);
+            console.log(getIndustries.data.data);
+        }
+    }, [getIndustries.isError, getIndustries.isLoading, getIndustries.data])
+
+    const { mutate, isPending } = useMutation({
+        mutationFn: (data: any) => httpService.put(`${Urls.auth}/update/user/${id}`, data),
+        onError: (error) => {
+            toast.show(error?.message, { type: 'danger', placement: 'bottom' });
+        },
+        onSuccess: (data) => {
+            toast.show('Interests updated successfully', { type: 'success', placement: 'bottom' });
+            setStage(1);
+            router.push('/auth/login');
+        }
+    });
+
 
     const toggleItem = (item: string) => {
         setActive(prev => {
@@ -53,26 +85,9 @@ const InterestPage = () => {
                 return;
             }
 
-            setLoading(true);
-
-            // Update the user record in the database
-            const { error: updateError } = await supabase
-                .from('Users')
-                .update({
-                    interests: active,
-                })
-                .eq('id', id);
-
-            if (updateError) {
-                throw updateError;
-            }
-            setLoading(false);
-            toast.show('Interests updated successfully', { type: 'success', placement: 'bottom' });
-            setStage(1);
-            router.push('/auth/login');
+            mutate({ interests: active });
         } catch (error: any) {
             toast.show(error?.message || 'An error occurred', { type: 'danger', placement: 'bottom' });
-            setLoading(false);
         }
     }
 
@@ -85,7 +100,7 @@ const InterestPage = () => {
                     <ScrollView style={{ height: '100%' }} contentContainerStyle={{ paddingBottom: 100 }} >
 
                         <Box flexDirection='row' width={'100%'} flexWrap='wrap' marginBottom='m' justifyContent='space-between'>
-                            {items.map((item, index) => (
+                            {!getIndustries.isError && !getIndustries.isLoading && industries.map((item, index) => (
                                 <TouchableOpacity
                                     onPress={() => toggleItem(item)}
                                     style={{
@@ -98,11 +113,12 @@ const InterestPage = () => {
                                         borderRadius: 15,
                                         backgroundColor: theme.colors.mainBackgroundColor,
                                         justifyContent: 'center',
-                                        alignItems: 'center'
+                                        alignItems: 'center',
+                                        paddingHorizontal: 10
                                     }}
                                     key={index.toString()}
                                 >
-                                    <CustomText variant='subheader' fontSize={18} color='primaryColor'>{item}</CustomText>
+                                    <CustomText variant='body' textAlign='center' fontSize={18} color='primaryColor'>{item.replaceAll('_', ' ')}</CustomText>
                                 </TouchableOpacity>
                             ))}
                         </Box>
@@ -121,7 +137,7 @@ const InterestPage = () => {
                     textColor='white'
                     variant='subheader'
                     onPress={handleSave}
-                    isLoading={loading}
+                    isLoading={isPending}
                 />
             </Box>
         </Box>

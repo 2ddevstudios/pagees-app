@@ -4,18 +4,19 @@ import CustomText from '@/components/CustomText'
 import AuthHeader from '@/components/auth/AuthHeader'
 import { CustomTextInput } from '@/components/form/CustomInput'
 import { SubmitButton } from '@/components/form/SubmitButton'
+import Urls from '@/hooks/http/urls'
 import useForm from '@/hooks/useForm'
 import useToast from '@/hooks/useToast'
-import { supabase } from '@/lib/supabase'
 import { signupSchema } from '@/services/validation'
+import httpService from '@/utils/httpService'
+import { useMutation } from '@tanstack/react-query'
 import { router } from 'expo-router'
 import { atom, useSetAtom } from 'jotai'
-import React, { useState } from 'react'
+import React from 'react'
 
 export const signupIdAtom = atom<string | null>(null);
 
 const SignupPage = () => {
-    const [isLoading, setIsLoading] = useState(false);
     const setId = useSetAtom(signupIdAtom);
 
     const toast = useToast();
@@ -28,62 +29,26 @@ const SignupPage = () => {
         validationSchema: signupSchema,
     });
 
+    // handle mutation
+    const { isPending, mutate } = useMutation({
+        mutationFn: (data: any) => httpService.post(`${Urls.auth}/create`, data),
+        onError: (error: any) => {
+            toast.show(error?.message, { type: 'danger', placement: 'top' })
+        },
+        onSuccess: (data) => {
+            console.log(data.data);
+            setId(data?.data.data?._id as string);
+            toast.show('Please check your email for an OTP code', { type: 'success', placement: 'top' });
+            router.push('/auth/verifyemail');
+        }
+    })
+
     // functions
     const handleSubmit = async ({ email, password }: { email: string, password: string }) => {
         try {
-            setIsLoading(true);
-            // check the database for the email first
-            const { data: UserExist, error: UserExistError } = await supabase
-                .from('Users')
-                .select('*')
-                .eq('email', email)
-                .single()
-
-            if (UserExist) {
-                console.log(UserExist);
-                toast.show('A user with this email already exisits', { type: 'danger', placement: 'top' });
-                setIsLoading(false);
-                return;
-            }
-
-            if (!UserExist) {
-                console.log('NO USER FOUND');
-                console.log(UserExistError);
-                setIsLoading(false);
-                // // signup the user
-                const { data, error } = await supabase.auth.signUp({
-                    email,
-                    password,
-                    options: {
-                        emailRedirectTo: `${window.location.origin}/auth/callback`,
-                    }
-                });
-
-                if (!error) {
-                    console.log(data);
-                    // create the User details
-                    const details = await supabase.from('Users').insert({
-                        email,
-                        id: data?.user?.id,
-                    });
-                    console.log(details);
-                    setId(data?.user?.id as string);
-                    toast.show('Please check your email for a confirmation link', { type: 'success', placement: 'top' });
-                    setIsLoading(false);
-                    router.push('/auth/setup');
-                }
-
-                if (error) {
-                    toast.show(error?.message, { type: 'danger', placement: 'bottom' });
-                    setIsLoading(false);
-                }
-            }
-
-
-
+            mutate({ email, password });
         } catch (error: any) {
             toast.show(error?.message, { type: 'danger' });
-            setIsLoading(false);
         }
     }
     return renderForm(
@@ -98,7 +63,7 @@ const SignupPage = () => {
 
                 <Box height={50} />
                 <CustomText onPress={() => router.push('/auth/login')} variant='medium' fontSize={16} marginBottom='l' color='primaryColor' textAlign='center'>Already have an account? Login</CustomText>
-                <SubmitButton label='Submit' isLoading={isLoading} width={'100%'} onSubmit={(data) => handleSubmit(data)} />
+                <SubmitButton label='Submit' isLoading={isPending} width={'100%'} onSubmit={(data) => handleSubmit(data)} />
             </Box>
         </Box>
     )

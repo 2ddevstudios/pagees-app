@@ -4,16 +4,16 @@ import CustomText from '@/components/CustomText'
 import AuthHeader from '@/components/auth/AuthHeader'
 import { CustomTextInput } from '@/components/form/CustomInput'
 import { SubmitButton } from '@/components/form/SubmitButton'
+import Urls from '@/hooks/http/urls'
 import useForm from '@/hooks/useForm'
 import useToast from '@/hooks/useToast'
-import { supabase } from '@/lib/supabase'
 import { loginSchema } from '@/services/validation'
+import httpService from '@/utils/httpService'
+import { useMutation } from '@tanstack/react-query'
 import { router } from 'expo-router'
-import React, { useState } from 'react'
+import React from 'react'
 
 const LoginPage = () => {
-    const [isLoading, setIsLoading] = useState(false);
-
     const toast = useToast();
     const { renderForm } = useForm({
         defaultValues: {
@@ -23,22 +23,22 @@ const LoginPage = () => {
         validationSchema: loginSchema
     });
 
+    // handle mutation
+    const { isPending, mutate } = useMutation({
+        mutationFn: (data: any) => httpService.post(`${Urls.auth}/login`, data),
+        onError: (error: any) => {
+            console.log(error);
+            toast.show('An Error occured', { type: 'danger', placement: 'top' })
+        },
+        onSuccess: (data) => {
+            toast.show('Login successful', { type: 'success', placement: 'top' });
+        }
+    })
+
     // functions
     const handleSubmit = async ({ email, password }: { email: string, password: string }) => {
-        try {
-            setIsLoading(true);
-            const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-            console.log(data);
-
-            if (error) {
-                toast.show(error?.message, { type: 'danger', placement: 'top' });
-            }
-            toast.show('Login successful', { type: 'success', placement: 'top' });
-            setIsLoading(false);
-        } catch (error: any) {
-            toast.show(error?.message, { type: 'danger' });
-            setIsLoading(false);
-        }
+        console.log({ email, password })
+        mutate({ email, password });
     }
     return renderForm(
         <Box flex={1} backgroundColor='secondaryBackgroundColor'>
@@ -51,7 +51,7 @@ const LoginPage = () => {
                 <CustomText variant='medium' fontSize={16} mt='m'>I forgot my password</CustomText>
                 <Box height={50} />
                 <CustomText onPress={() => router.push('/auth/signup')} variant='medium' fontSize={16} marginBottom='l' color='primaryColor' textAlign='center'>Don&apos;t have an account? Lets Create one!</CustomText>
-                <SubmitButton label='Submit' isLoading={isLoading} width={'100%'} onSubmit={(data) => handleSubmit(data)} />
+                <SubmitButton label='Submit' isLoading={isPending} width={'100%'} onSubmit={(data) => handleSubmit(data)} />
             </Box>
         </Box>
     )

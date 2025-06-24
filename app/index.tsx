@@ -43,8 +43,8 @@ const LandingPage = () => {
             colors={['#6B73FF', '#000DFF']}
             style={{ flex: 1 }}
         >
-            <StatusBar style="light" backgroundColor='white' translucent animated />
-            <Box flex={0.7} justifyContent='center' alignItems='center' paddingHorizontal='m'>
+            <StatusBar style="light" backgroundColor='white' translucent animated networkActivityIndicatorVisible />
+            <Box flex={0.68} justifyContent='center' alignItems='center' paddingHorizontal='m'>
                 <PagerView style={{ flex: 1, width: '100%', height: '100%' }} onPageScroll={(e) => setIndex(e.nativeEvent.position)}>
                     {items.map((item, index) => (
                         <Box key={index.toString()} flex={1} width={'100%'} height={"100%"}>
